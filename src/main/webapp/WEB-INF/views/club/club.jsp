@@ -34,7 +34,7 @@
                         </li>
                         <li>
                             <div class="club-modal-contents">
-                                <div class="post-img"><img src="" alt="게시글미디어"></div>
+                                <div class="post-img"><img id="modal-post-image" alt="게시글미디어"></div>
                                 <div class="post-text"></div>
                             </div>
                         </li>
@@ -132,7 +132,7 @@
                                 data-writer="${c.empName}">
                                 <div class="club-card-info">
                                     <ul>
-                                        <li><img src="#" alt="동호회프로필" class="club-profile-img"></li>
+                                        <li><img src="${c.clubProfile}" alt="동호회프로필" class="club-profile-img"></li>
                                         <li class="board-list-club-name" data-clubCode="${c.clubCode}">${c.clubName}</li>
                                         <!-- 가입하기 버튼 -->
                                         <li>
@@ -262,11 +262,11 @@
         removeAllOption();
         fetch(clubBoardURL + '/myclubList/' + empNo)
             .then(res => res.json())
-            .then(resResult => {
-                if (resResult.length === 0) {
+            .then(JoinedClubListResResult => {
+                if (JoinedClubListResResult.length === 0) {
                     myBoardTag += "<div> 가입한 동호회가 없습니다.</div>";
                 } else {
-                    for (let oneClub of resResult) {
+                    for (let oneClub of JoinedClubListResResult) {
                         const {
                             ecIndex,
                             empJoinDate,
@@ -353,7 +353,6 @@
         
         $clubCard.parentElement.onclick = e => {
             
-            
             // 동호회 가입하기 버튼 클릭시
             if(e.target.classList.contains('join')) {
                 
@@ -406,8 +405,7 @@
             }
 
             // 컨텐츠를 클릭했을 경우만 상세보기
-            else if (e.target.classList.contains('board-list-club-content') || e.target.classList.contains(
-                    'board-list-club-URL')) {
+            else if (e.target.classList.contains('board-list-club-content')) {
 
                 e.preventDefault();
                 const cbNo = e.target.closest('.club-card').dataset.bno;
@@ -430,8 +428,13 @@
                     '.club-profile-img').textContent;
                 // $modalPostImg.textContent = 
 
-                $modalPostImg.children.src = e.target.parentElement.querySelector('.board-list-club-URL')
-                .textContent;
+                // e.target 확인
+                console.log("e.target : " + e.target);
+                console.log("e.target.parentElement : " + e.target.parentElement);
+                console.log("e.target.previousElementSibling.querySelector('img').src : " + e.target.previousElementSibling.querySelector('img').src);
+                // $modalPostImg.children.src = e.target.previousElementSibling.querySelector('img').src;
+                const modalPostImg = document.getElementById('modal-post-image');
+                modalPostImg.setAttribute('src', e.target.previousElementSibling.querySelector('img').src);
 
                 // 수정 삭제 버튼 지우기 함수
                 removeModDelBtn();
@@ -452,11 +455,11 @@
 
         fetch(clubBoardURL + '/boardReply/' + cbNo)
             .then(res => res.json())
-            .then(resResult => {
-                if (resResult.length === 0) {
+            .then(clubReplyListResResult => {
+                if (clubReplyListResResult.length === 0) {
                     replyTag += "<div class='noreply'>댓글이 없습니다.</div>"
                 } else {
-                    for (let rep of resResult) {
+                    for (let rep of clubReplyListResResult) {
                         const {clubRepNo, clubRepContent, clubRepDate, cbNo, empNo, empName} = rep;
 
                    replyTag += "<div class='club-modal-reply-list-one' data-clubRepNo='" + clubRepNo + "' data-cbNo='" + cbNo + "'"
@@ -612,7 +615,7 @@
         $addReply.onclick = e => {
             const $clubReplyCbNo = document.querySelector('.club-modal-replies-container').dataset.cbno;
             const $clubReplyWriter = document.querySelector('.club-reply-writer').value;
-            const $clubReplyContent = document.querySelector('.write-reply').value;
+            let $clubReplyContent = document.querySelector('.write-reply').value;
 
             // 클라이언트 입력값 검증
             if ($clubReplyContent.value === '') {
@@ -687,6 +690,7 @@
         //========= 메인 실행부 =========//
         (function () {
 
+            console.log("empNo : " + empNo);
             // 내 게시글 목록 비동기 조회
             myBoardList();
 

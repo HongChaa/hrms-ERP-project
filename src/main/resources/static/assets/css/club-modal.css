@@ -56,14 +56,19 @@
     width: 500px;
     height: 350px;
     margin: 10px auto;
-    background: rgb(204, 204, 204);
+    display: flex;
+}
+
+img#modal-post-image {
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* 게시글 상세보기 시 댓글란 */
 .post-text {
     width: 500px;    
     height: 250px;
-    background: rgb(172, 172, 172);
+    background: rgb(246, 246, 246);
     margin: 10px auto;
     padding: 15px;
 }

@@ -34,7 +34,7 @@
                         </li>
                         <li>
                             <div class="club-modal-contents">
-                                <div class="post-img"><img src="" alt="게시글미디어"></div>
+                                <div class="post-img"><img id="modal-post-image" alt="게시글미디어"></div>
                                 <div class="post-text"></div>
                             </div>
                         </li>
@@ -132,7 +132,7 @@
                                 data-writer="${c.empName}">
                                 <div class="club-card-info">
                                     <ul>
-                                        <li><img src="#" alt="동호회프로필" class="club-profile-img"></li>
+                                        <li><img src="${c.clubProfile}" alt="동호회프로필" class="club-profile-img"></li>
                                         <li class="board-list-club-name" data-clubCode="${c.clubCode}">${c.clubName}</li>
                                         <!-- 가입하기 버튼 -->
                                         <li>
@@ -230,7 +230,7 @@
             .then(resResult => {
                 // console.log(resResult);
                 if (resResult.length === 0) {
-                    myBoardTag += "<div> 작성한 게시글이 없습니다.</div>";
+                    myBoardTag += "<div id='noMyBoard'> 작성한 게시글이 없습니다.</div>";
                 } else {
                     for (let oneboard of resResult) {
                         const {
@@ -262,11 +262,11 @@
         removeAllOption();
         fetch(clubBoardURL + '/myclubList/' + empNo)
             .then(res => res.json())
-            .then(resResult => {
-                if (resResult.length === 0) {
-                    myBoardTag += "<div> 가입한 동호회가 없습니다.</div>";
+            .then(JoinedClubListResResult => {
+                if (JoinedClubListResResult.length === 0) {
+                    myClubTag += "<div id='noJoinedClub'> 가입한 동호회가 없습니다.</div>";
                 } else {
-                    for (let oneClub of resResult) {
+                    for (let oneClub of JoinedClubListResResult) {
                         const {
                             ecIndex,
                             empJoinDate,
@@ -303,7 +303,7 @@
                 .then(res => res.json())
                 .then(resResult => {
                     if (resResult.length === 0) {
-                        myReplyTag += "<div> 작성한 댓글이 없습니다.</div>";
+                        myReplyTag += "<div id='noMyReply'> 작성한 댓글이 없습니다.</div>";
                     } else {
                         for (let oneReply of resResult) {
                             const {
@@ -350,9 +350,9 @@
         const $modalDate = document.querySelector('.reply-time');
 
         const $joinedClubList = document.querySelectorAll('.joined-club-list');
+        const modalPostImg = document.getElementById('modal-post-image');
         
         $clubCard.parentElement.onclick = e => {
-            
             
             // 동호회 가입하기 버튼 클릭시
             if(e.target.classList.contains('join')) {
@@ -406,8 +406,7 @@
             }
 
             // 컨텐츠를 클릭했을 경우만 상세보기
-            else if (e.target.classList.contains('board-list-club-content') || e.target.classList.contains(
-                    'board-list-club-URL')) {
+            else if (e.target.classList.contains('board-list-club-content')) {
 
                 e.preventDefault();
                 const cbNo = e.target.closest('.club-card').dataset.bno;
@@ -430,15 +429,15 @@
                     '.club-profile-img').textContent;
                 // $modalPostImg.textContent = 
 
-                $modalPostImg.children.src = e.target.parentElement.querySelector('.board-list-club-URL')
-                .textContent;
+                // $modalPostImg.children.src = e.target.previousElementSibling.querySelector('img').src;
+                modalPostImg.setAttribute('src', e.target.previousElementSibling.querySelector('img').src);
 
                 // 수정 삭제 버튼 지우기 함수
                 removeModDelBtn();
 
                 // 게시글 상세보기 클릭시 (가입하기 버튼)태그 생성
-                let detailJoinTag = '<button id="join-club-btn">가입하기</button>';
-                document.querySelector('.detail-join-btn').innerHTML = detailJoinTag;
+                // let detailJoinTag = '<button id="join-club-btn">가입하기</button>';
+                // document.querySelector('.detail-join-btn').innerHTML = detailJoinTag;
                         
 
                 // 게시글 상세보기 시 댓글 목록 비동기 처리
@@ -452,11 +451,11 @@
 
         fetch(clubBoardURL + '/boardReply/' + cbNo)
             .then(res => res.json())
-            .then(resResult => {
-                if (resResult.length === 0) {
+            .then(clubReplyListResResult => {
+                if (clubReplyListResResult.length === 0) {
                     replyTag += "<div class='noreply'>댓글이 없습니다.</div>"
                 } else {
-                    for (let rep of resResult) {
+                    for (let rep of clubReplyListResResult) {
                         const {clubRepNo, clubRepContent, clubRepDate, cbNo, empNo, empName} = rep;
 
                    replyTag += "<div class='club-modal-reply-list-one' data-clubRepNo='" + clubRepNo + "' data-cbNo='" + cbNo + "'"
@@ -555,7 +554,7 @@
                     // $modalDate.textContent = cbDate;
 
                     // $modalProfile.textContent = e.target.parentElement.previousElementSibling.querySelector('.club-profile-img').textContent;
-                    $modalPostImg.children.src = cbURL;
+                    modalPostImg.src = "/hrms"+cbURL;
                     // 가입하기 버튼 삭제 함수
                     removeJoinBtn();
 
@@ -589,17 +588,16 @@
                 // console.log(rno);
 
                 // 서버에 삭제 비동기 요청
-                    fetch(URL + '/' + rno, {
+                    fetch(clubBoardURL + '/' + $clubRepNo, {
                         method: 'DELETE'
                     }).then(res => {
                         if (res.status === 200) {
                             alert('댓글이 정상 삭제됨!');
+                            myReplyList();
                             return res.json();
                         } else {
                             alert('댓글 삭제 실패!');
                         }
-                    }).then(responseResult => {
-                        renderReplyList(responseResult);
                     });
 
             }
@@ -612,7 +610,7 @@
         $addReply.onclick = e => {
             const $clubReplyCbNo = document.querySelector('.club-modal-replies-container').dataset.cbno;
             const $clubReplyWriter = document.querySelector('.club-reply-writer').value;
-            const $clubReplyContent = document.querySelector('.write-reply').value;
+            let $clubReplyContent = document.querySelector('.write-reply');
 
             // 클라이언트 입력값 검증
             if ($clubReplyContent.value === '') {
@@ -623,7 +621,7 @@
             const replyBox = {
                 cbNo: $clubReplyCbNo,
                 empNo: $clubReplyWriter,
-                clubRepContent: $clubReplyContent
+                clubRepContent: $clubReplyContent.value
             }
 
             const requestReplyInfo = {
@@ -638,7 +636,7 @@
                 .then(res => {
                         if (res.status === 200) {
                             alert('댓글을 등록했습니다!');
-                            $clubReplyContent = '';
+                            $clubReplyContent.value = "";
                             clubReplyList($clubReplyCbNo);
                         } else {
                             alert('댓글 등록에 실패함!');
@@ -687,6 +685,7 @@
         //========= 메인 실행부 =========//
         (function () {
 
+            console.log("empNo : " + empNo);
             // 내 게시글 목록 비동기 조회
             myBoardList();
 

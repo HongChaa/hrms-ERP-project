@@ -216,7 +216,7 @@
 <script>
 
     const URL = "/hrms/confirm";
-    const empNo = ${login.empNo};
+    const empNo = '${login.empNo}';
     const roleCode = '${login.roleCode}';
 
         const confirmBox = document.getElementById('confirm-table');

@@ -3,6 +3,7 @@ package com.hrms.project4th.mvc.controller;
 import com.hrms.project4th.mvc.dto.requestDTO.ClubBoardSaveRequestDTO;
 import com.hrms.project4th.mvc.dto.requestDTO.ClubJoinRequestDTO;
 import com.hrms.project4th.mvc.dto.responseDTO.ClubBoardResponseDTO;
+import com.hrms.project4th.mvc.dto.responseDTO.EmployeeDetailResponseDTO;
 import com.hrms.project4th.mvc.dto.responseDTO.JoinedClubListResponseDTO;
 import com.hrms.project4th.mvc.dto.responseDTO.MyClubBoardResponseDTO;
 import com.hrms.project4th.mvc.entity.Employees;
@@ -19,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,46 +36,46 @@ public class ClubController {
     private  String clubRootPath;
 
     @GetMapping("/club-board-list")
-    public String clubBoardList(Model model) {
+    public String clubBoardList(HttpSession session, Model model) {
 
-        Employees exEmp = Employees.builder()
-                .empNo(1L)
-                .empName("홍길동")
-                .empEmail("1@test.com")
-                .empPassword("1234")
-                .empGender(Gender.M)
-                .build();
+//        Employees exEmp = Employees.builder()
+//                .empNo(1L)
+//                .empName("홍길동")
+//                .empEmail("1@test.com")
+//                .empPassword("1234")
+//                .empGender(Gender.M)
+//                .build();
+
+        EmployeeDetailResponseDTO exEmp = (EmployeeDetailResponseDTO) session.getAttribute("login");
+        model.addAttribute("exEmp", exEmp);
 
         List<ClubBoardResponseDTO> dto = clubBoardService.findAllClubBoard();
         model.addAttribute("clubBoardList", dto);
+        log.info("club-board-list-access-success");
+        log.info("clubBoardListDto : {}", dto);
 
         for (ClubBoardResponseDTO clubBoardResponseDTO : dto) {
             System.out.println("clubBoardResponseDTO = " + clubBoardResponseDTO);
         }
 
-        log.info("exEmp : {} ", exEmp);
-        model.addAttribute("exEmp", exEmp);
+//        log.info("exEmp : {} ", exEmp);
+//        model.addAttribute("exEmp", exEmp);
 
         return "club/club";
     }
 
     @GetMapping("/joined-club-board-list")
-    public String joinedClubBoardList(Model model, Long empNo) {
+    public String joinedClubBoardList(HttpSession session, Model model, Long empNo) {
 
-        Employees exEmp = Employees.builder()
-                .empNo(1L)
-                .empName("홍길동")
-                .empEmail("1@test.com")
-                .empPassword("1234")
-                .empGender(Gender.M)
-                .build();
+
+        EmployeeDetailResponseDTO exEmp = (EmployeeDetailResponseDTO) session.getAttribute("login");
 
         List<ClubBoardResponseDTO> dto = clubBoardService.findByEmpNoClubBoard(empNo);
         model.addAttribute("clubBoardList", dto);
 
         model.addAttribute("exEmp", exEmp);
-        log.info("exEmp : ", exEmp);
-        log.info("dto : ", dto, empNo);
+        log.info("exEmp : {}", exEmp);
+        log.info("dto : {}", dto);
         return "club/club";
     }
 

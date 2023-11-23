@@ -1,5 +1,6 @@
 package com.hrms.project4th.mvc.controller;
 
+import com.hrms.project4th.mvc.dto.requestDTO.ClubReplyModifyRequestDTO;
 import com.hrms.project4th.mvc.dto.requestDTO.ClubReplySaveRequestDTO;
 import com.hrms.project4th.mvc.dto.responseDTO.ClubReplyListResponseDTO;
 import com.hrms.project4th.mvc.service.ClubReplyService;
@@ -45,6 +46,12 @@ public class ClubReplyController {
     public ResponseEntity<?> clubReplyDelete(@PathVariable Long clubRepNo) {
         boolean b = clubReplyService.clubReplyDelete(clubRepNo);
         log.info("clubReplyDelete : {}", b);
+        return ResponseEntity.ok().body(b);
+    }
+
+    @PutMapping("/modifyClubReply")
+    public ResponseEntity<?> modifyClubReply(ClubReplyModifyRequestDTO dto) {
+        boolean b = clubReplyService.clubReplyModify(dto);
         return ResponseEntity.ok().body(b);
     }
 

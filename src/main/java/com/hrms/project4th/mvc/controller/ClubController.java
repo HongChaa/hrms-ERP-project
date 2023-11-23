@@ -1,5 +1,6 @@
 package com.hrms.project4th.mvc.controller;
 
+import com.hrms.project4th.mvc.dto.requestDTO.ClubBoardModifyRequestDTO;
 import com.hrms.project4th.mvc.dto.requestDTO.ClubBoardSaveRequestDTO;
 import com.hrms.project4th.mvc.dto.requestDTO.ClubJoinRequestDTO;
 import com.hrms.project4th.mvc.dto.responseDTO.ClubBoardResponseDTO;
@@ -38,14 +39,6 @@ public class ClubController {
     @GetMapping("/club-board-list")
     public String clubBoardList(HttpSession session, Model model) {
 
-//        Employees exEmp = Employees.builder()
-//                .empNo(1L)
-//                .empName("홍길동")
-//                .empEmail("1@test.com")
-//                .empPassword("1234")
-//                .empGender(Gender.M)
-//                .build();
-
         EmployeeDetailResponseDTO exEmp = (EmployeeDetailResponseDTO) session.getAttribute("login");
         model.addAttribute("exEmp", exEmp);
 
@@ -58,15 +51,12 @@ public class ClubController {
             System.out.println("clubBoardResponseDTO = " + clubBoardResponseDTO);
         }
 
-//        log.info("exEmp : {} ", exEmp);
-//        model.addAttribute("exEmp", exEmp);
 
         return "club/club";
     }
 
     @GetMapping("/joined-club-board-list")
     public String joinedClubBoardList(HttpSession session, Model model, Long empNo) {
-
 
         EmployeeDetailResponseDTO exEmp = (EmployeeDetailResponseDTO) session.getAttribute("login");
 
@@ -130,11 +120,28 @@ public class ClubController {
         String savePath = FileUtil.uploadClubFile(dto.getEmpNo(), dto.getCbURL(), clubRootPath);
         log.info(clubRootPath);
 
-
         boolean b = clubBoardService.clubBoardSave(dto, savePath);
         log.info("동호회 새 게시글 작성 성공여부: {}", b);
 
         return "redirect:/hrms/club/club-board-list";
+    }
+
+    @DeleteMapping("/deleteClubBoard/{cbNo}")
+    public ResponseEntity<?> deleteClubBoard(@PathVariable Long cbNo) {
+        boolean b = clubBoardService.clubBoardDelete(cbNo);
+
+        return ResponseEntity.ok().body(b);
+    }
+
+    @PutMapping("/modifyClubBoard")
+    public ResponseEntity<?> modifyClubBoard(HttpSession session, ClubBoardModifyRequestDTO dto) {
+        EmployeeDetailResponseDTO login = (EmployeeDetailResponseDTO)session.getAttribute("login");
+        String savePath = FileUtil.uploadClubFile(login.getEmpNo(), dto.getCbURL(), clubRootPath);
+
+        boolean b = clubBoardService.clubBoardModify(dto, savePath);
+
+        return ResponseEntity.ok().body(b);
+
     }
 
 }
